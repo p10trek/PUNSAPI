@@ -27,6 +27,7 @@ using PunsApi.Middlewares;
 using PunsApi.Models;
 using PunsApi.Services.Interfaces;
 using PunsApi.Services;
+using Microsoft.AspNetCore.HttpOverrides;
 
 namespace PunsAPI
 {
@@ -42,6 +43,17 @@ namespace PunsAPI
 
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddCors(options =>
+            {
+                options.AddDefaultPolicy(builder =>
+                builder
+                    .WithOrigins("http://localhost:8080")
+                    .AllowAnyMethod()
+                    .AllowAnyHeader()
+                    .AllowCredentials()
+            );
+            });
+
             var server = Configuration["DBServer"];
             var port = Configuration["DBPort"];
             var user = Configuration["DBUser"];
@@ -62,11 +74,11 @@ namespace PunsAPI
             services.AddDbContext<AppDbContext>(
                 x => x.UseSqlServer(connectionString));
 
-            services.AddCors();
+
 
             services.AddControllers().AddNewtonsoftJson(options =>
                 options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore
-            ); ;
+            );
 
             // configure strongly typed settings objects
             var appSettingsSection = Configuration.GetSection("AppSettings");
@@ -130,18 +142,12 @@ namespace PunsAPI
                 app.UseDeveloperExceptionPage();
             }
 
+            app.UseForwardedHeaders(new ForwardedHeadersOptions
+            {
+                ForwardedHeaders = ForwardedHeaders.XForwardedProto
+            });
+
             app.UseMiddleware<WebSocketMiddleware>();
-
-            app.UseCors(builder =>
-                builder
-                    .WithOrigins("http://localhost:8080")
-                    .AllowAnyMethod()
-                    .AllowAnyHeader()
-                    .AllowCredentials()
-            );
-            app.UseRouting();
-
-
 
             app.UseOpenApi(options =>
             {
@@ -157,6 +163,12 @@ namespace PunsAPI
             {
                 options.DocumentPath = "/swagger/v1/swagger.json";
             });
+
+            app.UseRouting();
+
+            app.UseCors();
+
+            app.UseAuthentication();
 
             app.UseAuthorization();
 

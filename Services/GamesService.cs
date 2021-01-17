@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using PunsApi.Data;
+using PunsApi.Dtos.Games;
 using PunsApi.Helpers;
 using PunsApi.Hubs;
 using PunsApi.Hubs.Interfaces;
@@ -38,7 +39,7 @@ namespace PunsApi.Services
 
             var room = _context.Rooms.FirstOrDefault(x => x.Id == player.RoomId);
 
-            if(room == null)
+            if (room == null)
                 return ServiceResponse<bool>.Error("No room found");
 
             var isRoomNameValid = NamesValidator.IsNameValid(request.GameName);
@@ -192,22 +193,32 @@ namespace PunsApi.Services
             _context.Games.Update(game);
             await _context.SaveChangesAsync();
 
-            return ServiceResponse<bool>.Ok(true,"Player scored and switched");
-
+            return ServiceResponse<bool>.Ok(true, "Player scored and switched");
         }
 
-        //public async Task<ServiceResponse<bool>> SwitchPlayer(string gameId, string playerId)
-        //{
-        //    var player = await GetPlayer();
+        public async Task<FetchScoreboardViewModel> GetScoreboard(string gameId)
+        {
+            var scoreboard = await _context.Players.OrderByDescending(i => i.Score).Where(i => i.GameId == new Guid(gameId)).Select(i => new ScoreboardDto()
+            {
+                Nickname = i.Nick,
+                Score = i.Score
+            }).ToListAsync();
+            return new FetchScoreboardViewModel(scoreboard);
+        }
 
-        //    var game = await _context.Games.FirstOrDefaultAsync(x => x.Id == player.GameId);
+        public async Task<ServiceResponse<bool>> SwitchPlayer(string gameId)
+        {
 
-        //    game.ShowingPlayerId = player.Id;
-        //    _context.Games.Update(game);
-        //    await _context.SaveChangesAsync();
+            var player = await _context.Players.OrderBy(_ => Guid.NewGuid()).FirstOrDefaultAsync(i => i.GameId == new Guid(gameId));
 
-        //    return ServiceResponse<bool>.Ok(true, "Player switched");
-        //}
+            var game = await _context.Games.FirstOrDefaultAsync(x => x.Id == player.GameId);
+
+            game.ShowingPlayerId = player.Id;
+            _context.Games.Update(game);
+            await _context.SaveChangesAsync();
+
+            return ServiceResponse<bool>.Ok(true, "Player switched");
+        }
 
         public async Task<ServiceResponse<FetchPlayersViewModel>> FetchPlayers()
         {

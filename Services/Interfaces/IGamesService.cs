@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using PunsApi.Dtos.Games;
 using PunsApi.Requests.Games;
 using PunsApi.Services.ServicesResponses;
 using PunsApi.ViewModels.Games;
@@ -12,7 +13,7 @@ namespace PunsApi.Services.Interfaces
     public interface IGamesService
     {
         Task<ServiceResponse<bool>> CreateGame(CreateGameRequest request);
-        
+
         Task<ServiceResponse<FetchGameViewModel>> FetchGame();
 
         Task<ServiceResponse<bool>> JoinGame(string gameId, string connectionId);
@@ -24,10 +25,12 @@ namespace PunsApi.Services.Interfaces
         Task<ServiceResponse<bool>> GameEnd(string gameId);
 
         Task<ServiceResponse<FetchPasswordsViewModel>> FetchPasswords();
-        
+
         Task<ServiceResponse<bool>> PlayerScored(string nextPlayerId);
 
-        //Task<ServiceResponse<bool>> SwitchPlayer(string gameId, string playerId);
+        Task<ServiceResponse<bool>> SwitchPlayer(string gameId);
+
+        Task<FetchScoreboardViewModel> GetScoreboard(string gameId);
 
         Task<ServiceResponse<FetchPlayersViewModel>> FetchPlayers();
     }

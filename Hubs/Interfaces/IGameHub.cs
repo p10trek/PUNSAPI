@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using PunsApi.Dtos.Games;
 using PunsApi.ViewModels.Games;
 
 namespace PunsApi.Hubs.Interfaces
@@ -25,5 +26,7 @@ namespace PunsApi.Hubs.Interfaces
         Task PlayerScored(string nextPlayerId);
 
         Task SendErrorMessage(string errorMessage);
+        Task Scoreboard(FetchScoreboardViewModel scoreboard);
+
     }
 }

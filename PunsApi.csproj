@@ -14,6 +14,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="ViewModels\GameHub\**" />
+    <Content Remove="ViewModels\GameHub\**" />
+    <EmbeddedResource Remove="ViewModels\GameHub\**" />
+    <None Remove="ViewModels\GameHub\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="3.1.10" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="3.1.10" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="3.1.9" />
@@ -27,10 +34,6 @@
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="3.1.4" />
     <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
     <PackageReference Include="NSwag.AspNetCore" Version="13.9.2" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="ViewModels\GameHub\" />
   </ItemGroup>
 
 </Project>

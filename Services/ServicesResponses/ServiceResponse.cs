@@ -18,7 +18,7 @@ namespace PunsApi.Services.ServicesResponses
         }
         public static ServiceResponse<bool> Ok(bool data = true, string message = "") => new ServiceResponse<bool>(data, true, message);
         public static ServiceResponse<T> Ok(T data, string message = "") => new ServiceResponse<T>(data, true, message);
-        public static ServiceResponse<T> Error(string message = "") => new ServiceResponse<T>(default(T), false, message);
+        public static ServiceResponse<T> Error(string message = "") => new ServiceResponse<T>(default, false, message);
 
     }
 }

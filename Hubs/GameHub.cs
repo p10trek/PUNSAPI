@@ -24,8 +24,14 @@ namespace PunsApi.Hubs
 
         public async Task JoinGame(string gameId)
         {
-            var result = await 
+            var result = await
                 _gamesService.JoinGame(gameId, Context.ConnectionId);
+
+            if (result.Success)
+            {
+                var scoreboard = await _gamesService.GetScoreboard(gameId);
+                await Clients.Groups(gameId).Scoreboard(scoreboard);
+            }
 
             if (!result.Success)
                 await Clients.Caller.SendErrorMessage(result.Message);
@@ -57,34 +63,36 @@ namespace PunsApi.Hubs
             if (!result.Success)
                 await Clients.Caller.SendErrorMessage(result.Message);
         }
-        //do wszystkich pójdzie, że ktoś zgadł, ale tylko ten z własciwym id
-        //wyśle requesta, że on ma być teraz pokazującym
+
         public async Task PlayerGuessed(string gameId, string nextPlayerId)
         {
             await Clients.Groups(gameId).PlayerGuessed(nextPlayerId);
-            
+
             var result =
                 await _gamesService.PlayerScored(nextPlayerId);
 
             if (result.Success)
+            {
                 await Clients.Groups(gameId).PlayerScored(nextPlayerId);
+                var scoreboard = await _gamesService.GetScoreboard(gameId);
+                await Clients.Groups(gameId).Scoreboard(scoreboard);
+
+            }
         }
 
         public async Task NewShowingPlayer(string gameId, string playerId)
         {
-            //var result = await _gamesService.SwitchPlayer(gameId, playerId);
-            //var result = await _gamesService.NewShowingPlayer(playerId);
-            //if (result.Success)
-            //{
-                //await Clients.Caller.SwitchPlayer();
-                await Clients.Groups(gameId).NewShowingPlayer(playerId);
-            //}
+            await Clients.Groups(gameId).NewShowingPlayer(playerId);
         }
 
         public async Task RemoveFromGameGroup(string gameId, string playerId)
         {
             await Groups.RemoveFromGroupAsync(Context.ConnectionId, gameId);
+            await _gamesService.QuitGame(gameId, Context.ConnectionId);
+
             await Clients.Group(gameId).PlayerQuit(playerId);
+
+            await _gamesService.SwitchPlayer(gameId);
         }
     }
 }
